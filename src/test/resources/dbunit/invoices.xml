@@ -1,0 +1,4 @@
+<dataset>
+    <customers id="customer-1" address="Silicon Valley" name="Tesla" />
+    <invoices id="invoice-1" cus_id="customer-1" currency="USD" invoice_total="500" />
+</dataset>
