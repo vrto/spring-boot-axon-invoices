@@ -34,12 +34,15 @@ public class InvoiceEntry {
 
     String currency;
 
+    boolean paid;
+
     InvoiceEntry(String identifier, ZonedDateTime issuedAt, ZonedDateTime dueTo, long amount) {
         this.id = identifier;
         this.issuedAt = issuedAt;
         this.dueTo = dueTo;
         this.invoiceTotal = amount;
         this.currency = "USD"; // TODO curency service based on customer
+        this.paid = false;
     }
 
     public String getCustomerName() {
@@ -48,5 +51,9 @@ public class InvoiceEntry {
 
     public String getCustomerAddress() {
         return customer.getAddress();
+    }
+
+    public boolean canDoPayment(long amount) {
+        return this.invoiceTotal == amount;
     }
 }

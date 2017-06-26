@@ -3,11 +3,15 @@ package sk.vrto.invoices.command.invoice;
 import lombok.val;
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.axonframework.test.aggregate.FixtureConfiguration;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import sk.vrto.invoices.command.customer.AddCustomerToInvoiceCommand;
 import sk.vrto.invoices.command.customer.CustomerToInvoiceAddedEvent;
+import sk.vrto.invoices.command.event.InvoiceCancellationRefusedEvent;
+import sk.vrto.invoices.command.event.InvoiceCancelledEvent;
 import sk.vrto.invoices.command.event.InvoiceCreatedEvent;
+import sk.vrto.invoices.command.event.InvoicePaymentSuccessfulEvent;
 
 import java.time.ZonedDateTime;
 
@@ -37,6 +41,35 @@ public class InvoiceCommandHandlerTest {
             .given(new InvoiceCreatedEvent(invoiceId, "Apple", 100, todayNoon(), in30days()))
             .when(new AddCustomerToInvoiceCommand(invoiceId, "Apple"))
             .expectEvents(new CustomerToInvoiceAddedEvent(invoiceId, "Apple"));
+    }
+
+    @Test
+    public void shouldPayInvoice() {
+        val invoiceId = new InvoiceId("new-id");
+        fixture
+            .given(new InvoiceCreatedEvent(invoiceId, "Apple", 100, todayNoon(), in30days()))
+            .when(new PayInvoiceCommand(invoiceId, 100))
+            .expectEvents(new InvoicePaymentSuccessfulEvent(invoiceId, 100));
+    }
+
+    @Test
+    public void shouldNotCancelAlreadyPaidInvoice() {
+        val invoiceId = new InvoiceId("new-id");
+        fixture
+            .given(
+                new InvoiceCreatedEvent(invoiceId, "Apple", 100, todayNoon(), in30days()),
+                new InvoicePaymentSuccessfulEvent(invoiceId, 100))
+            .when(new CancelInvoiceCommand(invoiceId))
+            .expectEvents(new InvoiceCancellationRefusedEvent(invoiceId));
+    }
+
+    @Test
+    public void shouldCancelAlreadyPaidInvoice() {
+        val invoiceId = new InvoiceId("new-id");
+        fixture
+            .given(new InvoiceCreatedEvent(invoiceId, "Apple", 100, todayNoon(), in30days()))
+            .when(new CancelInvoiceCommand(invoiceId))
+            .expectEvents(new InvoiceCancelledEvent(invoiceId));
     }
 
     private ZonedDateTime todayNoon() {

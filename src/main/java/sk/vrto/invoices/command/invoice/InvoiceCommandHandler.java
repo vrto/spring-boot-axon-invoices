@@ -29,4 +29,16 @@ public class InvoiceCommandHandler {
         Aggregate<Invoice> invoice = repository.load(command.getInvoiceId().getIdentifier());
         invoice.execute(aggregateRoot -> aggregateRoot.addCustomerToInvoice(command.getCustomerName()));
     }
+
+    @CommandHandler
+    public void handlePayInvoice(PayInvoiceCommand command) {
+        Aggregate<Invoice> invoice = repository.load(command.getInvoiceId().getIdentifier());
+        invoice.execute(aggregateRoot -> aggregateRoot.payInvoice(command.getAmount()));
+    }
+
+    @CommandHandler
+    public void handleCancelInvoice(CancelInvoiceCommand command) {
+        Aggregate<Invoice> invoice = repository.load(command.getInvoiceId().getIdentifier());
+        invoice.execute(aggregateRoot -> aggregateRoot.cancelInvoice());
+    }
 }
